@@ -65,15 +65,50 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Unknown tool: ${request.params.name}`,
-        },
-      ],
-      isError: true,
-    };
+    const toolResponse = await fetch(`${FUNCTION_HUB_URL}/api/run-tool`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+      },
+      body: JSON.stringify({
+        method: request.method,
+        params: request.params,
+      }),
+    });
+
+    if (toolResponse.ok) {
+      const toolResponseJson = await toolResponse.json();
+      return toolResponse
+        ? {
+            content: [
+              {
+                type: "text",
+                content: JSON.stringify(toolResponseJson, null, 2),
+              },
+            ],
+            isError: false,
+          }
+        : {
+            content: [
+              {
+                type: "text",
+                text: "No response from tool",
+              },
+            ],
+            isError: true,
+          };
+    } else {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Unknown tool: ${request.params.name}`,
+          },
+        ],
+        isError: true,
+      };
+    }
   } catch (error) {
     return {
       content: [
