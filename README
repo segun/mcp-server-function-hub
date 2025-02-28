@@ -20,7 +20,7 @@ Add the following to your `claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y",
-        "@segun/function-hub-mcp-server"
+        "github:segun/mcp-server-function-hub"
       ],
       "env": {
         "API_KEY": "<YOUR_API_KEY>"

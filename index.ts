@@ -51,7 +51,7 @@ export const getAllTools = async (prompt?: string): Promise<Tool[]> => {
 // Create an MCP server
 const server = new Server(
   {
-    name: "function-hub-mcp-server",
+    name: "mcp-server-function-hub",
     version: "0.0.1",
   },
   {
