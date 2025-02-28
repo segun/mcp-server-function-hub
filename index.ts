@@ -59,14 +59,9 @@ const server = new Server(
 );
 
 // Set up request handlers
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  const allTools = await getAllTools();
-  console.log("We got all tools: ", allTools);
-
-  return {
-    tools: allTools,
-  };
-});
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: await getAllTools(),
+}));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
