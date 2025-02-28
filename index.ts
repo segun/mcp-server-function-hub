@@ -22,12 +22,13 @@ export const getEnvVars = (): string => {
 };
 
 const API_KEY = getEnvVars();
-const FUNCTION_HUB_URL = "https://fh-master.onrender.com";
+// const FUNCTION_HUB_URL = "https://fh-master.onrender.com";
+const FUNCTION_HUB_URL = "http://localhost:3000";
 
 export const getAllTools = async (prompt?: string): Promise<Tool[]> => {
   if (!prompt) {
     // go to test tools
-    const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/get-tools`, {
+    const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/test-tools`, {
       headers: {
         "Content-Type": "application/json",
         "x-api-key": API_KEY,
@@ -67,7 +68,7 @@ const server = new Server(
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   const allTools = getAllTools();
   console.log("All Tools: ", { allTools });
-  
+
   return {
     tools: await getAllTools(),
   };
