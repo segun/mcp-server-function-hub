@@ -13,28 +13,22 @@ export const getEnvVars = () => {
     return API_KEY;
 };
 const API_KEY = getEnvVars();
-const FUNCTION_HUB_URL = "https://fh-master.onrender.com";
-export const getAllTools = async (prompt) => {
-    if (!prompt) {
-        // go to test tools
-        const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/get-tools`, {
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": API_KEY,
-            },
-        });
-        if (getToolsResponse.ok) {
-            const tools = (await getToolsResponse.json());
-            console.log(tools);
-            return tools;
-        }
-        else {
-            console.error("Failed to get tools");
-            return [];
-        }
+// const FUNCTION_HUB_URL = "https://fh-master.onrender.com";
+const FUNCTION_HUB_URL = "http://localhost:3000";
+export const getAllTools = async () => {
+    // go to test tools
+    const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/test-tools`, {
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key": API_KEY,
+        },
+    });
+    if (getToolsResponse.ok) {
+        const tools = (await getToolsResponse.json());
+        return tools;
     }
     else {
-        // go to qar
+        console.error("Failed to get tools");
         return [];
     }
 };
@@ -51,10 +45,10 @@ const server = new Server({
 });
 // Set up request handlers
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-    const allTools = getAllTools();
-    console.log("All Tools: ", { allTools });
+    const allTools = await getAllTools();
+    console.log("We got all tools: ", allTools);
     return {
-        tools: await getAllTools(),
+        tools: allTools,
     };
 });
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
