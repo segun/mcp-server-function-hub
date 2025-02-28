@@ -14,7 +14,7 @@ export const getEnvVars = () => {
 };
 const API_KEY = getEnvVars();
 // const FUNCTION_HUB_URL = "https://fh-master.onrender.com";
-const FUNCTION_HUB_URL = "http://localhost:3000";
+const FUNCTION_HUB_URL = "http://localhost:3001";
 export const getAllTools = async () => {
     // go to test tools
     const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/test-tools`, {
@@ -44,24 +44,55 @@ const server = new Server({
     },
 });
 // Set up request handlers
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-    const allTools = await getAllTools();
-    console.log("We got all tools: ", allTools);
-    return {
-        tools: allTools,
-    };
-});
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    tools: await getAllTools(),
+}));
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     try {
-        return {
-            content: [
-                {
-                    type: "text",
-                    text: `Unknown tool: ${request.params.name}`,
-                },
-            ],
-            isError: true,
-        };
+        const toolResponse = await fetch(`${FUNCTION_HUB_URL}/api/run-tool`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": API_KEY,
+            },
+            body: JSON.stringify({
+                method: request.params.name,
+                params: request.params.arguments,
+            }),
+        });
+        if (toolResponse.ok) {
+            const toolResponseJson = await toolResponse.json();
+            return toolResponse
+                ? {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(toolResponseJson, null, 2),
+                        },
+                    ],
+                    isError: false,
+                }
+                : {
+                    content: [
+                        {
+                            type: "text",
+                            text: "No response from tool",
+                        },
+                    ],
+                    isError: true,
+                };
+        }
+        else {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Unknown tool: ${request.params.name}`,
+                    },
+                ],
+                isError: true,
+            };
+        }
     }
     catch (error) {
         return {
@@ -78,7 +109,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 const runServer = async () => {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error("Google Maps MCP Server running on stdio");
+    console.error("Function Hub MCP Server running on stdio");
 };
 runServer().catch((error) => {
     console.error("Fatal error running server:", error);

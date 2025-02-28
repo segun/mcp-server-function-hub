@@ -79,13 +79,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     
     if (toolResponse.ok) {
       const toolResponseJson = await toolResponse.json();
-      console.log("We got a response from the tool", toolResponseJson);
       return toolResponse
         ? {
             content: [
               {
                 type: "text",
-                content: JSON.stringify(toolResponseJson, null, 2),
+                text: JSON.stringify(toolResponseJson, null, 2),
               },
             ],
             isError: false,
@@ -128,7 +127,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 const runServer = async () => {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Google Maps MCP Server running on stdio");
+  console.error("Function Hub MCP Server running on stdio");
 };
 
 runServer().catch((error) => {
