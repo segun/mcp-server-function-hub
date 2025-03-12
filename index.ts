@@ -27,7 +27,7 @@ const FUNCTION_HUB_URL = "http://localhost:3001";
 
 export const getAllTools = async (): Promise<Tool[]> => {
   // go to test tools
-  const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/test-tools`, {
+  const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/mcp/list-tools`, {
     headers: {
       "Content-Type": "application/json",
       "x-api-key": API_KEY,
@@ -58,10 +58,32 @@ const server = new Server(
   }
 );
 
+const PAGE_SIZE = 10;
 // Set up request handlers
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: await getAllTools(),
-}));
+server.setRequestHandler(ListToolsRequestSchema, async (request) => {
+  const cursor = request.params?.cursor;
+  let startIndex = 0;
+
+  if (cursor) {
+    const decodedCursor = parseInt(atob(cursor), 10);
+    if (!isNaN(decodedCursor)) {
+      startIndex = decodedCursor;
+    }
+  }
+
+  const ALL_TOOLS = await getAllTools();
+  const endIndex = Math.min(startIndex + PAGE_SIZE, ALL_TOOLS.length);
+
+  let nextCursor: string | undefined;
+  if (endIndex < ALL_TOOLS.length) {
+    nextCursor = btoa(endIndex.toString());
+  }
+
+  return {
+    tools: ALL_TOOLS.slice(startIndex, endIndex),
+    nextCursor: nextCursor,
+  };
+});
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
@@ -76,7 +98,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         params: request.params.arguments,
       }),
     });
-    
+
     if (toolResponse.ok) {
       const toolResponseJson = await toolResponse.json();
       return toolResponse
