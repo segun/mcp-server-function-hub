@@ -27,34 +27,23 @@ const FUNCTION_HUB_URL = "http://localhost:3001";
 
 export const getAllTools = async (): Promise<Tool[]> => {
   // go to test tools
-  const getToolsResponse = await fetch(`${FUNCTION_HUB_URL}/api/mcp/list-tools`, {
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": API_KEY,
-    },
-  });
-
-  console.log("getToolsResponse", getToolsResponse);
+  const getToolsResponse = await fetch(
+    `${FUNCTION_HUB_URL}/api/mcp/list-tools`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+      },
+      method: "POST",
+    }
+  );
 
   if (getToolsResponse.ok) {
     const tools = (await getToolsResponse.json()) as Tool[];
     return tools;
   } else {
     console.error("Failed to get tools");
-    return [{
-      "description": "Test tool",
-      "name": "test-tool",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the user",
-          },
-        },
-        "required": ["name"],
-      },
-    }];
+    return [];
   }
 };
 
@@ -140,7 +129,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         content: [
           {
             type: "text",
-            text: `Unknown tool: ${request.params.name}`,
+            text: "Error: Can not get tools",
           },
         ],
         isError: true,
