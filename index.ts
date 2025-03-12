@@ -73,8 +73,8 @@ server.setRequestHandler(ListToolsRequestSchema, async (request) => {
   const cursor = request.params?.cursor;
   const promptOrKeyword = request.params?.promptOrKeyword as string | undefined;
 
-  console.error("Requesting tools with cursor", {cursor, promptOrKeyword});
-  
+  console.error("Requesting tools with cursor", { cursor, promptOrKeyword });
+
   let startIndex = 0;
 
   if (cursor) {
@@ -100,15 +100,14 @@ server.setRequestHandler(ListToolsRequestSchema, async (request) => {
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
-    const toolResponse = await fetch(`${FUNCTION_HUB_URL}/api/run-tool`, {
+    const toolResponse = await fetch(`${FUNCTION_HUB_URL}/api/mcp/run-tool`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-api-key": API_KEY,
       },
       body: JSON.stringify({
-        method: request.params.name,
-        params: request.params.arguments,
+        ...request.params,
       }),
     });
 
