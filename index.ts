@@ -34,14 +34,27 @@ export const getAllTools = async (): Promise<Tool[]> => {
     },
   });
 
-  console.error("getToolsResponse", getToolsResponse);
+  console.log("getToolsResponse", getToolsResponse);
 
   if (getToolsResponse.ok) {
     const tools = (await getToolsResponse.json()) as Tool[];
     return tools;
   } else {
     console.error("Failed to get tools");
-    return [];
+    return [{
+      "description": "Test tool",
+      "name": "test-tool",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the user",
+          },
+        },
+        "required": ["name"],
+      },
+    }];
   }
 };
 
