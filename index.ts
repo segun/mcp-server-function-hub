@@ -25,7 +25,9 @@ const API_KEY = getEnvVars();
 // const FUNCTION_HUB_URL = "https://fh-master.onrender.com";
 const FUNCTION_HUB_URL = "http://localhost:3001";
 
-export const getAllTools = async (): Promise<Tool[]> => {
+export const getAllTools = async (
+  promptOrKeyword?: string
+): Promise<Tool[]> => {
   // go to test tools
   const getToolsResponse = await fetch(
     `${FUNCTION_HUB_URL}/api/mcp/list-tools`,
@@ -34,6 +36,9 @@ export const getAllTools = async (): Promise<Tool[]> => {
         "Content-Type": "application/json",
         "x-api-key": API_KEY,
       },
+      body: JSON.stringify({
+        promptOrKeyword: promptOrKeyword || undefined,
+      }),
       method: "POST",
     }
   );
@@ -66,6 +71,10 @@ const PAGE_SIZE = 10;
 // Set up request handlers
 server.setRequestHandler(ListToolsRequestSchema, async (request) => {
   const cursor = request.params?.cursor;
+  const promptOrKeyword = request.params?.promptOrKeyword as string | undefined;
+
+  console.error("Requesting tools with cursor", {cursor, promptOrKeyword});
+  
   let startIndex = 0;
 
   if (cursor) {
@@ -75,7 +84,7 @@ server.setRequestHandler(ListToolsRequestSchema, async (request) => {
     }
   }
 
-  const ALL_TOOLS = await getAllTools();
+  const ALL_TOOLS = await getAllTools(promptOrKeyword);
   const endIndex = Math.min(startIndex + PAGE_SIZE, ALL_TOOLS.length);
 
   let nextCursor: string | undefined;
