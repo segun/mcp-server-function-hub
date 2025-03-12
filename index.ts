@@ -34,6 +34,8 @@ export const getAllTools = async (): Promise<Tool[]> => {
     },
   });
 
+  console.error("getToolsResponse", getToolsResponse);
+
   if (getToolsResponse.ok) {
     const tools = (await getToolsResponse.json()) as Tool[];
     return tools;
